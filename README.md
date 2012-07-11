@@ -9,13 +9,14 @@ Why use ngxsbs?
 ---------------
 
 ngxsbs does the following important things:
-#. Accepts server blocks for a specified domain name, or its subdomains.
-#. Rejects server blocks for arbitrary domains not related to the specified domain name.
-#. Rejects domain-less server blocks. More than one of these would cause conflicts.
-#. Verifies that server blocks are broadly wellformed in isolation. This prevents injects that violate the above rules.
-#. Generates a potential valid NginX conf file, but with the .conftest extension.
-#. Launchs NginX's built-in configuration validator for the generated conf file.
-#. Deletes invalid .conftest files, and renames valid ones with the .conf extension.
+
+1. Accepts server blocks for a specified domain name, or its subdomains.
+1. Rejects server blocks for arbitrary domains not related to the specified domain name.
+1. Rejects domain-less server blocks. More than one of these would cause conflicts.
+1. Verifies that server blocks are broadly wellformed in isolation. This prevents injects that violate the above rules.
+1. Generates a potential valid NginX conf file, but with the .conftest extension.
+1. Launchs NginX's built-in configuration validator for the generated conf file.
+1. Deletes invalid .conftest files, and renames valid ones with the .conf extension.
 
 Command-line Usage:
 -------------------
