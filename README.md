@@ -21,9 +21,9 @@ ngxsbs does the following important things:
 Command-line Usage
 ------------------
 
-`ngxsbs domain in-file out-file`
+`ngxsbs [-t templatefile] domain infile [outfile]`
 
-e.g. `ngxsbs example.com example.com.userconf example.com.conf`
+e.g. `ngxsbs -t addlogs.template example.com example.com.userconf example.com.conf`
 
 Given example.com.userconf as follows:
 
