@@ -25,27 +25,57 @@ Command-line Usage
 
 e.g. `ngxsbs example.com example.com.userconf example.com.conf`
 
+Given example.com.userconf as follows:
+
+    server www.example.com {
+        return 301 $scheme://example.com$request_uri;
+    }
+
+    server example.com *.example.com {
+        location / { }
+    }
+
+ngxsbs produces example.com.conf as follows:
+
+    server {
+        server_name www.example.com;
+        access_log example.com.access.log AccessFormat;
+        error_log  example.com.error.log  ErrorFormat;
+
+        return 301 $scheme://example.com$request_uri;
+    }
+
+    server {
+        server_name example.com *.example.com;
+        access_log example.com.access.log AccessFormat;
+        error_log  example.com.error.log  ErrorFormat;
+
+        location / { }
+    }
+
+Many such configurations cannot co-exist without conflicting, as long as no twp configurations use the same domain name.  In addition, most of the configuration flexibility within NginX can be made available within the ngxsbs configuration files.
+
 Server Configuration Grammar
 ----------------------------
 
 Tokens:
 
-    string -> "[^"\\\r\n]*((\\(\")?)[^"\\\r\n]*)*" | '[^'\\\r\n]*((\\(\')?)[^'\\\r\n]*)*'
-    content -> [^\s\r\n"'\\]+ | [^\s\r\n"'\\]*((\\[^\s\r\n]?[^\s\r\n"'\\]*)+``
-    lb -> \{
-    rb -> \}
-    semi-> ;
-    server -> server
+    string      -> "[^"\\\r\n]*((\\(\")?)[^"\\\r\n]*)*" | '[^'\\\r\n]*((\\(\')?)[^'\\\r\n]*)*'
+    content     -> [^\s\r\n"'\\]+ | [^\s\r\n"'\\]*((\\[^\s\r\n]?[^\s\r\n"'\\]*)+``
+    lb          -> \{
+    rb          -> \}
+    semi        -> ;
+    server      -> server
     server_name -> server_name
 
 Ignore:
 
-    ws -> [\s\r\n]+
+    ws      -> [\s\r\n]+
     comment -> #[^\r\n]*
 
 Grammar:
 
-    Conf -> Server+
-    Server -> server content* lb Section rb
+    Conf    -> Server+
+    Server  -> server content* lb Section rb
     Section -> content (content | string)* (lb Block rb | semi)
-    Block -> (content | string | server | server_name)*  (lb Block rb | semi)
+    Block   -> (content | string | server | server_name)*  (lb Block rb | semi)
