@@ -53,7 +53,7 @@ ngxsbs produces example.com.conf as follows:
         location / { }
     }
 
-Many such configurations cannot co-exist without conflicting, as long as no twp configurations use the same domain name.  In addition, most of the configuration flexibility within NginX can be made available within the ngxsbs configuration files.
+Many such configurations cannot co-exist without conflicting, as long as no two configurations use the same domain name.  In addition, most of the configuration flexibility within NginX can be made available within the ngxsbs configuration files.
 
 Server Configuration Grammar
 ----------------------------
