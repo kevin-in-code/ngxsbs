@@ -18,9 +18,39 @@ ngxsbs does the following important things:
 1. Launchs NginX's built-in configuration validator for the generated conf file.
 1. Deletes invalid .conftest files, and renames valid ones with the .conf extension.
 
-Command-line Usage:
--------------------
+Command-line Usage
+------------------
 
-ngxsbs domain in-file out-file
+`ngxsbs domain in-file out-file`
 
-e.g. ngxsbs example.com example.com.userconf example.com.conf
+e.g. `ngxsbs example.com example.com.userconf example.com.conf`
+
+Server Configuration Grammar
+----------------------------
+
+Tokens:
+
+> string -> "[^"\\\r\n]*((\\(\")?)[^"\\\r\n]*)*" | '[^'\\\r\n]*((\\(\')?)[^'\\\r\n]*)*'
+> content -> [^\s\r\n"'\\]+ | [^\s\r\n"'\\]*((\\[^\s\r\n]?[^\s\r\n"'\\]*)+
+> lb -> \{
+> rb -> \}
+> semi-> ;
+> server -> server
+> server_name -> server_name
+
+Ignore:
+
+> ws -> [\s\r\n]+
+> comment -> #[^\r\n]*
+
+Grammar:
+
+> Conf -> Server+
+> Server -> server content* lb Section rb
+> Section -> content (content | string)* (lb Block rb | semi)
+> Block -> (content | string | server | server_name)*  (lb Block rb | semi)
+
+
+
+
+
