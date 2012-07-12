@@ -53,7 +53,7 @@ and the addlogs.template file as follows:
     ---- The following lines designate permitted and restricted directives. ----
     access_log ${HOME}/
     error_log  ${HOME}/
-    log_formatfs
+    log_format
     location
     return
     error_page
