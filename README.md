@@ -21,13 +21,25 @@ ngxsbs does the following important things:
 Command-line Usage
 ------------------
 
-`ngxsbs [-t templatefile] domain infile [outfile]`
+`ngxsbs [options] domain infile [outfile]`
 
-e.g. `ngxsbs -t addlogs.template example.com example.com.userconf example.com.conf`
+`ngxsbs [info-options]`
+
+Permitted options are:
+
+    -t templatefile : a text file that constrains and augments the generated configuration
+    -d string       : a string of comma-separated name=value definition pairs (template modifiers)
+    -l              : display the license (info option)
+    -u              : display usage (info option, default)
+
+### A Complete Usage Example
+
+`ngxsbs -t addlogs.template -d "HOME=/home/john" example.com example.com.userconf example.com.conf`
 
 Given example.com.userconf as follows:
 
     server www.example.com {
+        access_log /home/john/logs/www.example.com.access.log AccessFormat;
         return 301 $scheme://example.com$request_uri;
     }
 
@@ -35,14 +47,42 @@ Given example.com.userconf as follows:
         location / { }
     }
 
-ngxsbs produces example.com.conf as follows:
+
+and the addlogs.template file as follows:
+
+    ---- The following lines designate permitted and restricted directives. ----
+    access_log ${HOME}/
+    error_low  ${HOME}/
+    location
+    return
+    error_page
+    rewrite
+    if
+    try_files
+    ---- The following lines will be injected near the start of the server block. ----
+        ? access_log ${DOMAIN}.access.log AccessFormat;
+        error_log  ${DOMAIN}.error.log  ErrorFormat;
+
+        # USER SECTION FOLLOWS
+
+    ---- The following lines will be injected at the bottom of the server block. ----
+
+        # USER SECTION ENDS
+    ---- The end. ----
+
+Note the question-mark preceding the access_log entry in the template.  Such entries are optional, and are overridden by any like-named directive in the user-provided configuration.  ngxsbs will produce example.com.conf as follows:
 
     server {
         server_name www.example.com;
-        access_log example.com.access.log AccessFormat;
         error_log  example.com.error.log  ErrorFormat;
 
+        # USER SECTION FOLLOWS
+
+        access_log example.com.access.log AccessFormat;
+
         return 301 $scheme://example.com$request_uri;
+
+        # USER SECTION ENDS
     }
 
     server {
@@ -50,13 +90,19 @@ ngxsbs produces example.com.conf as follows:
         access_log example.com.access.log AccessFormat;
         error_log  example.com.error.log  ErrorFormat;
 
+        # USER SECTION FOLLOWS
+
         location / { }
+
+        # USER SECTION ENDS
     }
 
 Many such configurations cannot co-exist without conflicting, as long as no two configurations use the same domain name.  In addition, most of the configuration flexibility within NginX can be made available within the ngxsbs configuration files.
 
 Server Configuration Grammar
 ----------------------------
+
+The following is an almost complete description of the configuration grammar.  The only ommisions are the subtle details about the treatment of whitespace, and some small details pertaining to templates.  ngxsbs retains whitespace and comments in the generated file.  This should help in diagnosing any problems that may occur.
 
 Tokens:
 
