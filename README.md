@@ -51,15 +51,15 @@ Given example.com.userconf as follows:
 and the addlogs.template file as follows:
 
     ---- The following lines designate permitted and restricted directives. ----
-    access_log ${HOME}/
-    error_log  ${HOME}/
-    log_format
-    location
-    return
-    error_page
-    rewrite
-    if
-    try_files
+        access_log ${HOME}/
+        error_log  ${HOME}/
+        log_format
+        location
+        return
+        error_page
+        rewrite
+        if
+        try_files
     ---- The following lines will be injected near the start of the server block. ----
         ? access_log ${DOMAIN}.access.log AccessFormat;
         error_log  ${DOMAIN}.error.log  ErrorFormat;
