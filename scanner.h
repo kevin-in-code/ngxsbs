@@ -9,35 +9,51 @@
 #define SCANNER_BUFFER_LEN (MAX_TOKEN_LEN*2)
 
 typedef enum {
-    TT_EOF,
-    TT_EOL,
-    TT_WS,
-    TT_COMMENT,
-    TT_STRING,
-    TT_CONTENT,
-    TT_LB,
-    TT_RB,
-    TT_SEMI,
-    TT_SERVER,
-    TT_SERVER_NAME
-} TokenKindT;
+    NK_EOF,
+    NK_EOL,
+    NK_WS,
+    NK_COMMENT,
+    NK_STRING,
+    NK_CONTENT,
+    NK_WORD,
+    NK_LB,
+    NK_RB,
+    NK_SEMI,
+    NK_BREAK,
+    NK_CHAIN
+} NodeKindT;
 
-typedef struct {
-    TokenKindT kind;
-    char text[MAX_TOKEN_LEN];
-    int length;
-} TokenT;
+struct NodeS;
+typedef struct NodeS NodeT;
+
+struct NodeS {
+    NodeKindT kind;
+    char* text;
+    NodeT* children;
+    NodeT* next;
+};
 
 typedef struct {
     char buffer[SCANNER_BUFFER_LEN];
+    char* text;
     FILE* file;
+
+    /* scanner input buffer */
     int index;
     int size;
+
+    /* token text buffer */
+    int capacity;
+    int used;
+    
+    int line_start;
 } ScannerT;
+
+void release(NodeT* token);
 
 int init_scanner(ScannerT* scanner, const char* filename);
 void close_scanner(ScannerT* scanner);
 
-int scan(ScannerT* scanner, TokenT* token);
+NodeT* scan(ScannerT* scanner, int allowWord, int allowBreak);
 
 #endif

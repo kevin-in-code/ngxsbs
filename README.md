@@ -51,8 +51,8 @@ Given example.com.userconf as follows:
 and the addlogs.template file as follows:
 
     ---- The following lines designate permitted and restricted directives. ----
-        access_log ${HOME}/
-        error_log  ${HOME}/
+        access_log {$HOME}/
+        error_log  {$HOME}/
         log_format
         location
         return
@@ -61,8 +61,8 @@ and the addlogs.template file as follows:
         if
         try_files
     ---- The following lines will be injected near the start of the server block. ----
-        ? access_log ${DOMAIN}.access.log AccessFormat;
-        error_log  ${DOMAIN}.error.log  ErrorFormat;
+        ? access_log {$DOMAIN}.access.log AccessFormat;
+        error_log  {$DOMAIN}.error.log  ErrorFormat;
 
         # USER SECTION FOLLOWS
 
@@ -103,17 +103,17 @@ Many such configurations cannot co-exist without conflicting, as long as no two 
 Server Configuration Grammar
 ----------------------------
 
-The following is an almost complete description of the configuration grammar.  The only ommisions are the subtle details about the treatment of whitespace, and some small details pertaining to templates.  ngxsbs retains whitespace and comments in the generated file.  This should help in diagnosing any problems that may occur.
+The following is an almost complete description of the configuration grammar.  The main differences are the subtle details about the treatment of whitespace, and some small details pertaining to templates.  ngxsbs retains whitespace and comments in the generated file.  This should help in diagnosing any problems that may occur.
 
 Tokens:
 
     string      -> "[^"\\\r\n]*((\\(\")?)[^"\\\r\n]*)*" | '[^'\\\r\n]*((\\(\')?)[^'\\\r\n]*)*'
-    content     -> [^\s\r\n"'\\]+ | [^\s\r\n"'\\]*((\\[^\s\r\n]?[^\s\r\n"'\\]*)+``
+    content     -> [^\s\r\n"'\\]+ | [^\s\r\n"'\\]*((\\[^\s\r\n]?[^\s\r\n"'\\]*)+
     lb          -> \{
     rb          -> \}
     semi        -> ;
     server      -> server
-    server_name -> server_name
+    directive   -> [A-Za-z0-9_]+
 
 Ignore:
 
@@ -123,6 +123,6 @@ Ignore:
 Grammar:
 
     Conf    -> Server+
-    Server  -> server content* lb Section rb
-    Section -> content (content | string)* (lb Block rb | semi)
+    Server  -> server content* lb Section* rb
+    Section -> directive (content | string)* (lb Block rb | semi)
     Block   -> (content | string | server | server_name)*  (lb Block rb | semi)
