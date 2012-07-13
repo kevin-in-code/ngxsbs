@@ -122,7 +122,7 @@ Ignore:
 
 Grammar:
 
-    Conf    -> Server+
+    Conf    -> Server*
     Server  -> server content* lb Section* rb
     Section -> directive (content | string)* (lb Block rb | semi)
     Block   -> (content | string | server | server_name)*  (lb Block rb | semi)

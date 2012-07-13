@@ -5,14 +5,11 @@
 
 #include <stdio.h>
 
-#define MAX_TOKEN_LEN 1024
-#define SCANNER_BUFFER_LEN (MAX_TOKEN_LEN*2)
+#define SCANNER_BUFFER_LEN 2048
 
 typedef enum {
     NK_EOF,
-    NK_EOL,
-    NK_WS,
-    NK_COMMENT,
+    NK_SKIP,
     NK_STRING,
     NK_CONTENT,
     NK_WORD,
@@ -20,6 +17,7 @@ typedef enum {
     NK_RB,
     NK_SEMI,
     NK_BREAK,
+    NK_VAR,
     NK_CHAIN
 } NodeKindT;
 
@@ -31,9 +29,12 @@ struct NodeS {
     char* text;
     NodeT* children;
     NodeT* next;
+    int line;
 };
 
 typedef struct {
+    const char* filename;
+    
     char buffer[SCANNER_BUFFER_LEN];
     char* text;
     FILE* file;
@@ -47,13 +48,14 @@ typedef struct {
     int used;
     
     int line_start;
+    int line;
 } ScannerT;
 
-void release(NodeT* token);
+void release_token(NodeT* token);
 
-int init_scanner(ScannerT* scanner, const char* filename);
-void close_scanner(ScannerT* scanner);
+ScannerT* init_scanner(const char* filename);
+void release_scanner(ScannerT* scanner);
 
-NodeT* scan(ScannerT* scanner, int allowWord, int allowBreak);
+NodeT* scanner_scan(ScannerT* scanner, int allowWord, int allowBreak, int allowVar);
 
 #endif

@@ -5,30 +5,38 @@
 #include "scanner.h"
 #include "error.h"
 
-void release(NodeT* token) {
-    NodeT* next;
-    if (token->text) free(token->text);
-    if (token->children) release(token->children);
-    next = token;
-    free(token);
-    token = next->next;
-    
-    while (token) {
-        next = token->next;
-        token->next = NULL;
-        release(token);
-        token = next;
+void release_token(NodeT* token) {
+    if (token) {
+        NodeT* next;
+        if (token->text) free(token->text);
+        if (token->children) release_token(token->children);
+        next = token;
+        free(token);
+        token = next->next;
+        
+        while (token) {
+            next = token->next;
+            token->next = NULL;
+            release_token(token);
+            token = next;
+        }
     }
 }
 
-int init_scanner(ScannerT* scanner, const char* filename) {
+ScannerT* init_scanner(const char* filename) {
+    ScannerT* scanner;
     char* buffer;
+
+    scanner = (ScannerT*) malloc(sizeof(ScannerT));
+    if (!scanner) error("Out of memory");
+
     FILE* file = fopen(filename, "r");
     if (!file) error("Could not open file: %s", filename);
 
     buffer = (char*) malloc(1024);
     if (!buffer) error("Out of memory");
     
+    scanner->filename = filename;
     scanner->file = file;
 
     scanner->text = buffer;
@@ -38,12 +46,15 @@ int init_scanner(ScannerT* scanner, const char* filename) {
     scanner->index = 0;
     scanner->size = 0;
     scanner->line_start = 1;
-    return 1;
+    scanner->line = 1;
+    return scanner;
 }
 
-void close_scanner(ScannerT* scanner) {
-    free(scanner->text);
-    fclose(scanner->file);
+void release_scanner(ScannerT* scanner) {
+    if (scanner) {
+        free(scanner->text);
+        fclose(scanner->file);
+    }
 }
 
 char prime_buffer(ScannerT* scanner) {
@@ -136,12 +147,16 @@ int is_content_char(char c) {
             (c != '\'') || (c != '\"') || (c != '\\'));
 }
 
-NodeT* scan(ScannerT* scanner, int allowWord, int allowBreak) {
+NodeT* scanner_scan(ScannerT* scanner, int allowWord, int allowBreak, int allowVar) {
     NodeT* token;
     char next = prime_buffer(scanner);
     
     token = (NodeT*) malloc(sizeof(NodeT));
+    if (!token) error("Out of memory");
     
+    scanner->used = 0;
+    
+    token->line = scanner->line;
     token->text = NULL;
     token->children = NULL;
     token->next = NULL;
@@ -151,51 +166,66 @@ NodeT* scan(ScannerT* scanner, int allowWord, int allowBreak) {
         return token;
     }
     else {
+        int lf = 0;
         /* Finally, now we're ready to scan. */
         switch (next) {
             case ' ':
             case '\t':
-                token->kind = NK_WS;
+                token->kind = NK_SKIP;
                 scanner->line_start = 0;
                 next = take_char(scanner, next);
                 while ((next) && ((next == ' ') || (next == '\t'))) {
                     next = take_char(scanner, next);
                 }
                 if (next == '#') {
-                    token->kind = NK_COMMENT;
                     while ((next) && (next != '\r') && (next != '\n')) {
                         next = take_char(scanner, next);
                     }
-                }
-                else
-                if (next == '-') {
-                    if ((peek(scanner, 1) == '-') && (peek(scanner, 2) == '-')) {
-                        token->kind = NK_BREAK;
-                        while ((next) && (next != '\r') && (next != '\n')) {
-                            next = take_char(scanner, next);
-                        }
+                    lf = 0;
+                    if (next == '\r') {
+                        next = take_char(scanner, next);
+                        lf = 1;
                     }
+                    if (next == '\n') {
+                        next = take_char(scanner, next);
+                        lf = 1;
+                    }
+                    scanner->line += lf;
                 }
                 break;
                 
             case '\r':
-            case '\n':
-                token->kind = NK_EOL;
+                token->kind = NK_SKIP;
                 scanner->line_start = 1;
-                while ((next) && ((next == '\r') || (next == '\n'))) {
-                    next = take_char(scanner, next);
-                }
+                scanner->line++;
+                next = take_char(scanner, next);
+                if (next == '\n') next = take_char(scanner, next);
+                break;
+
+            case '\n':
+                token->kind = NK_SKIP;
+                scanner->line_start = 1;
+                scanner->line++;
+                next = take_char(scanner, next);
+                break;
             
             case '#':
-                token->kind = NK_COMMENT;
+                token->kind = NK_SKIP;
                 scanner->line_start = 0;
                 next = take_char(scanner, next);
                 while ((next) && (next != '\r') && (next != '\n')) {
                     next = take_char(scanner, next);
                 }
-                while ((next) && ((next == '\r') || (next == '\n'))) {
+                lf = 0;
+                if (next == '\r') {
                     next = take_char(scanner, next);
+                    lf = 1;
                 }
+                if (next == '\n') {
+                    next = take_char(scanner, next);
+                    lf = 1;
+                }
+                scanner->line += lf;
                 break;
             
             case '-':
@@ -206,6 +236,16 @@ NodeT* scan(ScannerT* scanner, int allowWord, int allowBreak) {
                 while ((next) && (next != '\r') && (next != '\n')) {
                     next = take_char(scanner, next);
                 }
+                lf = 0;
+                if (next == '\r') {
+                    next = take_char(scanner, next);
+                    lf = 1;
+                }
+                if (next == '\n') {
+                    next = take_char(scanner, next);
+                    lf = 1;
+                }
+                scanner->line += lf;
                 break;
             
             case '\"':
@@ -218,10 +258,15 @@ NodeT* scan(ScannerT* scanner, int allowWord, int allowBreak) {
                     }
                     while (next == '\\') {
                         next = take_char(scanner, next);
-                        if (next == '\"') next = take_char(scanner, next);
+                        if ((next) && (next != '\r') && (next != '\n')) next = take_char(scanner, next);
                     }
                 } while ((next) && (next != '\r') && (next != '\n') && (next != '\"'));
-                if (next == '\"') next = take_char(scanner, next);
+                if (next == '\"') {
+                    next = take_char(scanner, next);
+                }
+                else {
+                    error("%s:%d: string does not end on this line", scanner->filename, token->line);
+                }
                 break;
             
             case '\'':
@@ -234,10 +279,15 @@ NodeT* scan(ScannerT* scanner, int allowWord, int allowBreak) {
                     }
                     while (next == '\\') {
                         next = take_char(scanner, next);
-                        if (next == '\'') next = take_char(scanner, next);
+                        if ((next) && (next != '\r') && (next != '\n')) next = take_char(scanner, next);
                     }
                 } while ((next) && (next != '\r') && (next != '\n') && (next != '\''));
-                if (next == '\'') next = take_char(scanner, next);
+                if (next == '\'') {
+                    next = take_char(scanner, next);
+                }
+                else {
+                    error("%s:%d: string does not end on this line", scanner->filename, token->line);
+                }
                 break;
             
             case 'a': case 'b': case 'c': case 'd': case 'e':
@@ -273,6 +323,19 @@ NodeT* scan(ScannerT* scanner, int allowWord, int allowBreak) {
                 token->kind = NK_LB;
                 scanner->line_start = 0;
                 next = take_char(scanner, next);
+                if (allowVar && (next == '$')) {
+                    token->kind = NK_VAR;
+                    next = take_char(scanner, next);
+                    while ((next) && is_word_char(next)) {
+                        next = take_char(scanner, next);
+                    }
+                    if (next == '}') {
+                        next = take_char(scanner, next);
+                    }
+                    else {
+                        error("%s:%d: invalid template variable on this line", scanner->filename, token->line);
+                    }
+                }
                 break;
             
             case '}':
@@ -304,10 +367,19 @@ NodeT* scan(ScannerT* scanner, int allowWord, int allowBreak) {
                 } while (next == '\\');
                 break;
         }
-        scanner->text[scanner->used] = '\0';
-        token->text = (char*) malloc(scanner->used+1);
-        if (!token->text) error("Out of memory");
-        memcpy(token->text, scanner->text, scanner->used+1);
+
+        if (token->kind == NK_VAR) {
+            token->text = (char*) malloc(scanner->used+1-3);
+            if (!token->text) error("Out of memory");
+            memcpy(token->text, &scanner->text[1], scanner->used+1-3);
+            token->text[scanner->used-3] = '\0';
+        }
+        else {
+            token->text = (char*) malloc(scanner->used+1);
+            if (!token->text) error("Out of memory");
+            memcpy(token->text, scanner->text, scanner->used+1);
+            token->text[scanner->used] = '\0';
+        }
 
         return token;
     }
