@@ -28,7 +28,7 @@ Command-line Usage
 Permitted options are:
 
     -t templatefile : a text file that constrains and augments the generated configuration
-    -d string       : a string of comma-separated name=value definition pairs (template modifiers)
+    -d string       : a string of comma-separated name=value variable bindings
     -l              : display the license (info option)
     -u              : display usage (info option, default)
 
@@ -61,8 +61,8 @@ and the addlogs.template file as follows:
         if
         try_files
     ---- The following lines will be injected near the start of the server block. ----
-        ? access_log {$DOMAIN}.access.log AccessFormat;
-        error_log  {$DOMAIN}.error.log  ErrorFormat;
+        access_log? {$DOMAIN}.access.log AccessFormat;
+        error_log   {$DOMAIN}.error.log  ErrorFormat;
 
         # USER SECTION FOLLOWS
 
@@ -124,5 +124,5 @@ Grammar:
 
     Conf    -> Server*
     Server  -> server content* lb Section* rb
-    Section -> directive (content | string)* (lb Block rb | semi)
-    Block   -> (content | string | server | server_name)*  (lb Block rb | semi)
+    Section -> directive (content | string)* (lb Block* rb | semi)
+    Block   -> (content | string | server | server_name)*  (lb Block* rb | semi)
