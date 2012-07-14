@@ -121,8 +121,8 @@ void peek_bindings(ScannerT* scanner) {
     char* cs;
     int k = 0;
 
-    if (peek(scanner, 0) != '{') return;
-    if (peek(scanner, 1) != '$') return;
+    if (peek(scanner, 0) != '$') return;
+    if (peek(scanner, 1) != '{') return;
     scanner->index += 2;
 
     for (; k < 126; k++) {
@@ -163,7 +163,7 @@ char take_char(ScannerT* scanner, char c) {
     scanner->text[scanner->used] = c;
     scanner->used++;
 
-    if (scanner->bindings && (!scanner->injection) && (scanner->buffer[scanner->index] == '{')) {
+    if (scanner->bindings && (!scanner->injection) && (scanner->buffer[scanner->index] == '$')) {
         peek_bindings(scanner);
     }
     
@@ -196,7 +196,7 @@ char take_char(ScannerT* scanner, char c) {
 }
 
 
-NodeT* scanner_scan(ScannerT* scanner, BindingT* bindings, int allowWord, int allowBreak) {
+NodeT* scanner_scan(ScannerT* scanner, int allowWord, int allowBreak) {
     NodeT* token;
     char next = prime_buffer(scanner);
     
@@ -213,6 +213,9 @@ NodeT* scanner_scan(ScannerT* scanner, BindingT* bindings, int allowWord, int al
     if (scanner->index == scanner->size) {
         /* We've run out of input. */
         token->kind = NK_EOF;
+        token->text = (char*) malloc(1);
+        if (!token->text) error("Out of memory");
+        token->text[0] = '\0';
         return token;
     }
     else {
@@ -283,7 +286,8 @@ NodeT* scanner_scan(ScannerT* scanner, BindingT* bindings, int allowWord, int al
                 break;
             
             case '-':
-                if (!allowBreak || !scanner->line_start || (peek(scanner, 1) != '-') || (peek(scanner, 2) != '-')) goto content;
+            case '=':
+                if (!allowBreak || !scanner->line_start || (peek(scanner, 1) != next) || (peek(scanner, 2) != next)) goto content;
                 token->kind = NK_BREAK;
                 scanner->line_start = 0;
                 next = take_char(scanner, next);

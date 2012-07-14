@@ -8,8 +8,13 @@
 BindingT* init_binding(const char* name, const char* value) {
     char* new_name;
     char* new_value;
-    int nlen = strlen(name);
-    int vlen = strlen(value);
+    int nlen, vlen = 0;
+
+    nlen = strlen(name);
+    
+    if (value != NULL) {
+        vlen = strlen(value);
+    }
 
     BindingT* binding = malloc(sizeof(BindingT));
     if (!binding) error("Out of memory");
@@ -20,7 +25,12 @@ BindingT* init_binding(const char* name, const char* value) {
     
     new_value = (char*) malloc(vlen + 1);
     if (!new_value) error("Out of memory");
-    memcpy(new_value, value, vlen + 1);
+    if (value) {
+        memcpy(new_value, value, vlen + 1);
+    }
+    else {
+        new_value[0] = '\0';
+    }
     
     binding->next = NULL;
     binding->name = new_name;

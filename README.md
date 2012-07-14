@@ -50,9 +50,10 @@ Given example.com.userconf as follows:
 
 and the addlogs.template file as follows:
 
-    ---- The following lines designate permitted and restricted directives. ----
-        access_log {$HOME}/
-        error_log  {$HOME}/
+    === allow these directives ===
+        access_log ${HOME}/
+        error_log  ${HOME}/
+        include    /opt/nginx/includes/
         log_format
         location
         return
@@ -60,16 +61,24 @@ and the addlogs.template file as follows:
         rewrite
         if
         try_files
-    ---- The following lines will be injected near the start of the server block. ----
-        access_log? {$DOMAIN}.access.log AccessFormat;
-        error_log   {$DOMAIN}.error.log  ErrorFormat;
+    === host =====================
+        access_log? ${DOMAIN}.access.log AccessFormat;
+        error_log   ${DOMAIN}.error.log  ErrorFormat;
 
         # USER SECTION FOLLOWS
 
-    ---- The following lines will be injected at the bottom of the server block. ----
+    ------------------------------
 
         # USER SECTION ENDS
-    ---- The end. ----
+    === host update.${DOMAIN} ====
+        access_log? ${DOMAIN}.access.log AccessFormat;
+        error_log   ${DOMAIN}.error.log  ErrorFormat;
+
+        # USER SECTION FOLLOWS
+
+    ------------------------------
+
+        # USER SECTION ENDS
 
 Note the question-mark preceding the access_log entry in the template.  Such entries are optional, and are overridden by any like-named directive in the user-provided configuration.  ngxsbs will produce example.com.conf as follows:
 
@@ -80,7 +89,6 @@ Note the question-mark preceding the access_log entry in the template.  Such ent
         # USER SECTION FOLLOWS
 
         access_log example.com.access.log AccessFormat;
-
         return 301 $scheme://example.com$request_uri;
 
         # USER SECTION ENDS
@@ -124,5 +132,4 @@ Grammar:
 
     Conf    -> Server*
     Server  -> server content* lb Section* rb
-    Section -> directive (content | string)* (lb Block* rb | semi)
-    Block   -> (content | string | server | server_name)*  (lb Block* rb | semi)
+    Section -> directive (content | string)* (lb Section* rb | semi)

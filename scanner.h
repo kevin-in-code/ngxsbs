@@ -60,6 +60,6 @@ void release_node(NodeT* token);
 ScannerT* init_scanner(const char* filename, BindingT* bindings);
 void release_scanner(ScannerT* scanner);
 
-NodeT* scanner_scan(ScannerT* scanner, BindingT* bindings, int allowWord, int allowBreak);
+NodeT* scanner_scan(ScannerT* scanner, int allowWord, int allowBreak);
 
 #endif
