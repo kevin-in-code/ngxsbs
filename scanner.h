@@ -37,7 +37,7 @@ struct NodeS {
 typedef struct {
     const char* filename;
     BindingT* bindings;
-    
+
     char buffer[SCANNER_BUFFER_LEN];
     char sidebuf[128];
     char* text;
@@ -51,9 +51,10 @@ typedef struct {
     /* token text buffer */
     int capacity;
     int used;
-    
+
     int line_start;
     int line;
+    int initialised;
 } ScannerT;
 
 void release_node(NodeT* token);

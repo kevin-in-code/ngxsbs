@@ -1,0 +1,32 @@
+=== allow these directives ===
+    access_log ${HOME}/
+    error_log  ${HOME}/
+    include    /opt/nginx/includes/
+    log_format
+    location
+    return
+    error_page
+    rewrite
+    if
+    try_files
+=== host =====================
+    access_log? ${DOMAIN}.access.log AccessFormat;
+    error_log   ${DOMAIN}.error.log  ErrorFormat;
+
+    # USER SECTION FOLLOWS
+
+------------------------------
+
+    # USER SECTION ENDS
+
+=== host update.${DOMAIN} ====
+    access_log? ${DOMAIN}.access.log AccessFormat;
+    error_log   ${DOMAIN}.error.log  ErrorFormat;
+
+    # USER SECTION FOLLOWS
+
+------------------------------
+
+    # USER SECTION ENDS
+
+

@@ -11,18 +11,18 @@ BindingT* init_binding(const char* name, const char* value) {
     int nlen, vlen = 0;
 
     nlen = strlen(name);
-    
+
     if (value != NULL) {
         vlen = strlen(value);
     }
 
     BindingT* binding = malloc(sizeof(BindingT));
     if (!binding) error("Out of memory");
-    
+
     new_name = (char*) malloc(nlen + 1);
     if (!new_name) error("Out of memory");
     memcpy(new_name, name, nlen + 1);
-    
+
     new_value = (char*) malloc(vlen + 1);
     if (!new_value) error("Out of memory");
     if (value) {
@@ -31,7 +31,7 @@ BindingT* init_binding(const char* name, const char* value) {
     else {
         new_value[0] = '\0';
     }
-    
+
     binding->next = NULL;
     binding->name = new_name;
     binding->value = new_value;
@@ -57,7 +57,7 @@ BindingT* decode_bindings(const char* csv) {
     char* buffer = (char*) malloc(len + 1);
     if (!buffer) error("Out of memory");
     memcpy(buffer, csv, len + 1);
-    
+
     while (index < len) {
         nameIndex = index;
         for (; (index < len) && (buffer[index] != '='); index++);
@@ -69,10 +69,10 @@ BindingT* decode_bindings(const char* csv) {
         if ((index < len) && (index + 1 == len)) error("Format error in variable bindings");
         buffer[index] = '\0';
         index++;
-        
+
         list = add_binding(list, &buffer[nameIndex], &buffer[valueIndex]);
     }
-    
+
     free(buffer);
     return list;
 }
@@ -81,6 +81,9 @@ BindingT* lookup_binding(BindingT* list, const char* name) {
     while (list) {
         if (strcmp(list->name, name) == 0) {
             return list;
+        }
+        else {
+            list = list->next;
         }
     }
     return NULL;
@@ -92,7 +95,7 @@ void release_binding(BindingT* binding) {
         binding = rest;
         rest = binding->next;
         binding->next = NULL;
-        
+
         free(binding->name);
         free(binding->value);
         free(binding);

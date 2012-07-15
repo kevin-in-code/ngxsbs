@@ -1,0 +1,9 @@
+server www.example.com {
+    access_log /home/john/logs/www.example.com.access.log AccessFormat;
+    return 301 $scheme://example.com$request_uri;
+}
+
+server example.com *.example.com {
+    location / { }
+}
+
