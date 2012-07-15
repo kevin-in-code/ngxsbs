@@ -14,29 +14,38 @@ ngxsbs does the following important things:
 1. Rejects server blocks for arbitrary domains not related to the specified domain name.
 1. Rejects domain-less server blocks. More than one of these would cause conflicts.
 1. Verifies that server blocks are broadly wellformed in isolation. This prevents injects that violate the above rules.
-1. Generates a potential valid NginX conf file, but with the .conftest extension.
-1. Launchs NginX's built-in configuration validator for the generated conf file.
-1. Deletes invalid .conftest files, and renames valid ones with the .conf extension.
+1. Verifies that server blocks only use NginX directives selected from a safe list.
+1. Generates a potentially valid NginX conf file, but with the .test extension.
+1. Launchs NginX's built-in configuration validator for the generated configuration file.
+1. Deletes invalid .test files, and renames valid ones with the .conf extension.
 
 Command-line Usage
 ------------------
 
-`ngxsbs [options] domain infile [outfile]`
+`ngxsbs [options] domain [infile [outfile]]`
 
 `ngxsbs [info-options]`
 
 Permitted options are:
 
     -t templatefile : a text file that constrains and augments the generated configuration
+    -op out-path    : the directory in which the output should be placed (defaults to current directory)
+    -tp temp-path   : the directory for temporary configuration files (defaults to current directory)
     -d string       : a string of comma-separated name=value variable bindings
     -l              : display the license (info option)
     -u              : display usage (info option, default)
 
+Default file names:
+
+    infile    : ${DOMAIN}.server
+    outfile   : ${out-path}${infile sans extension}.conf
+    tempfiles : ${temp-path}ngxsbs.test, ${temp-path}ngxsbs.test.context
+
 ### A Complete Usage Example
 
-`ngxsbs -t addlogs.template -d "HOME=/home/john" example.com example.com.userconf example.com.conf`
+`ngxsbs -t addlogs.template -d "HOME=/home/john" example.com example.com.server example.com.conf`
 
-Given example.com.userconf as follows:
+Given example.com.server as follows:
 
     server www.example.com {
         access_log /home/john/logs/www.example.com.access.log AccessFormat;
@@ -70,6 +79,7 @@ and the addlogs.template file as follows:
     ------------------------------
 
         # USER SECTION ENDS
+   
     === host update.${DOMAIN} ====
         access_log? ${DOMAIN}.access.log AccessFormat;
         error_log   ${DOMAIN}.error.log  ErrorFormat;
@@ -79,6 +89,7 @@ and the addlogs.template file as follows:
     ------------------------------
 
         # USER SECTION ENDS
+   
 
 Note the question-mark preceding the access_log entry in the template.  Such entries are optional, and are overridden by any like-named directive in the user-provided configuration.  ngxsbs will produce example.com.conf as follows:
 
@@ -92,6 +103,7 @@ Note the question-mark preceding the access_log entry in the template.  Such ent
         return 301 $scheme://example.com$request_uri;
 
         # USER SECTION ENDS
+    
     }
 
     server {
@@ -104,6 +116,7 @@ Note the question-mark preceding the access_log entry in the template.  Such ent
         location / { }
 
         # USER SECTION ENDS
+    
     }
 
 Many such configurations cannot co-exist without conflicting, as long as no two configurations use the same domain name.  In addition, most of the configuration flexibility within NginX can be made available within the ngxsbs configuration files.

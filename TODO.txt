@@ -1,0 +1,18 @@
+Things that need to be done:
+----------------------------
+1. code for generating configurations
+
+for each server block:
+    find applicable template block
+    for each head template section:
+        if required or not found in server block:
+            output section
+    output server block content
+    for each tail template section:
+        if required or not found in server block:
+            output section
+
+2. code for testing configurations
+3. code for relocating configurations
+4. command-line interface
+5. code for testing

@@ -1,7 +1,8 @@
 
+#pragma once
+
 #ifndef scanner_h
 #define scanner_h
-#pragma once
 
 #include <stdio.h>
 #include "bindings.h"

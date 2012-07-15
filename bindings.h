@@ -1,7 +1,8 @@
 
+#pragma once
+
 #ifndef bindings_h
 #define bindings_h
-#pragma once
 
 struct BindingS;
 typedef struct BindingS BindingT;

@@ -3,7 +3,7 @@ CFLAGS = -pedantic -std=c99 -Os
 LFLAGS = 
 
 NAME = ngxsbs
-OBJS = ngxsbs.o
+OBJS = error.o bindings.o scanner.o parser.o generate.o ngxsbs.o
 TESTS = test-ngxsbs.o
 
 all: build test

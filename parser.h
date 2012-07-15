@@ -1,7 +1,8 @@
 
+#pragma once
+
 #ifndef parser_h
 #define parser_h
-#pragma once
 
 #include "scanner.h"
 #include "bindings.h"
