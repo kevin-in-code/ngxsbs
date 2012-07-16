@@ -84,7 +84,7 @@ and the **addlogs.template** file as follows:
     
         # USER SECTION FOLLOWS
     
-    ------------------------------
+        --------------------------
     
         # USER SECTION ENDS
     
@@ -94,7 +94,7 @@ and the **addlogs.template** file as follows:
     
         # USER SECTION FOLLOWS
     
-    ------------------------------
+        --------------------------
     
         # USER SECTION ENDS
     

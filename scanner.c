@@ -252,6 +252,14 @@ NodeT* scanner_scan(ScannerT* scanner, int allowWord, int allowBreak) {
                         next = take_char(scanner, next);
                     }
                 }
+                else
+                if ((next == '-') && allowBreak && (peek(scanner, 1) == next) && (peek(scanner, 2) == next)) {
+                    token->kind = NK_BREAK;
+                    next = take_char(scanner, next);
+                    while ((next) && (next != '\r') && (next != '\n')) {
+                        next = take_char(scanner, next);
+                    }
+                }
                 lf = 0;
                 if (next == '\r') {
                     next = take_char(scanner, next);
@@ -263,6 +271,7 @@ NodeT* scanner_scan(ScannerT* scanner, int allowWord, int allowBreak) {
                 }
                 if (next == '\0') lf = 1;
                 if (!lf) token->empty = 0;
+                if (lf) scanner->line_start = 1;
                 scanner->line += lf;
                 token->ends_line = lf;
                 break;
@@ -300,6 +309,7 @@ NodeT* scanner_scan(ScannerT* scanner, int allowWord, int allowBreak) {
                     next = take_char(scanner, next);
                     lf = 1;
                 }
+                if (lf) scanner->line_start = 1;
                 scanner->line += lf;
                 token->ends_line = 1;
                 break;
@@ -322,6 +332,7 @@ NodeT* scanner_scan(ScannerT* scanner, int allowWord, int allowBreak) {
                     next = take_char(scanner, next);
                     lf = 1;
                 }
+                if (lf) scanner->line_start = 1;
                 scanner->line += lf;
                 token->ends_line = 1;
                 break;
