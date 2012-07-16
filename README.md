@@ -17,7 +17,7 @@ ngxsbs does the following important things:
 1. Verifies that server blocks only use NginX directives selected from a safe list.
 1. Generates a potentially valid NginX conf file, but with the .test extension.
 1. Launchs NginX's built-in configuration validator for the generated configuration file.
-1. Deletes invalid .test files, and renames valid ones with the .conf extension.
+1. Deletes invalid .test files, and renames valid ones with the .conf extension, subsequently moving these to the output directory.
 
 Command-line Usage
 ------------------
@@ -45,7 +45,7 @@ Default file names:
 
 `ngxsbs -t addlogs.template -d "HOME=/home/john" example.com example.com.server example.com.conf`
 
-Given example.com.server as follows:
+Given **example.com.server** as follows:
 
     server www.example.com {
         root /home/john/www/example.com/;
@@ -57,7 +57,7 @@ Given example.com.server as follows:
     }
 
 
-and the addlogs.template file as follows:
+and the **addlogs.template** file as follows:
 
     === allow these directives ===
         access_log ${HOME}/
@@ -99,7 +99,7 @@ and the addlogs.template file as follows:
         # USER SECTION ENDS
     
 
-Note the question-mark preceding the access_log entry in the template.  Such entries are optional, and are overridden by any like-named directive in the user-provided configuration.  ngxsbs will produce example.com.conf as follows:
+Note the question-mark preceding the root entry in the template.  Such entries are optional, and are overridden by any like-named directive in the user-provided configuration.  In this case, such an overriding root path is further constrained in that it must be within the user's home directory.  For the input shown here, ngxsbs will produce **example.com.conf** as follows:
 
     server {
         server_name www.example.com;
@@ -140,7 +140,7 @@ Many such configurations cannot co-exist without conflicting, as long as no two 
 Server Configuration Grammar
 ----------------------------
 
-The following is an almost complete description of the configuration grammar.  The main differences are the subtle details about the treatment of whitespace, and some small details pertaining to templates.  ngxsbs retains whitespace and comments in the generated file.  This should help in diagnosing any problems that may occur.
+The following is an almost complete description of the configuration grammar.  The main differences are the subtle details about the treatment of whitespace, and some small details pertaining to templates.  ngxsbs retains as much of the user's whitespace and comments in the generated file.  Although, this has complicated the implementation considerably, it is an important feature.  By keeping the user formatting and comments it becomes far easier to diagnose any problems that may occur.  For example, the source and generated configurations can be viewed under a diff program without the change-noise that would result from thinning whitespace and dropping comments.
 
 Tokens:
 
