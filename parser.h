@@ -17,6 +17,8 @@ struct TemplateS {
     TemplateT* next;
 };
 
+int valid_prefix(const char* sub, const char* text);
+
 TemplateT* init_template();
 void release_template(TemplateT* t);
 

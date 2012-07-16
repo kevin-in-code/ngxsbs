@@ -232,18 +232,6 @@ NodeT* take_token(ParserT* parser, int allowWord, int kinds, int skips, int allo
     }
     return token;
 }
-/*
-NodeT* parser_parse_user_conf(ParserT* parser) {
-    NodeT* conf = init_chain();
-    NodeT* last = NULL;
-
-    NodeT* item = parser_parse_conf(parser);
-    while (item) {
-        last = chain_add(conf, last, item);
-        item = parser_parse_conf(parser);
-    }
-    return conf;
-}*/
 
 NodeT* parser_parse_conf(ParserT* parser) {
     NodeT* conf = init_chain();
@@ -258,6 +246,7 @@ NodeT* parser_parse_conf(ParserT* parser) {
 }
 
 NodeT* parser_parse_server_block(ParserT* parser) {
+    int server_line, num_domains;
     NodeT* chain;
     NodeT* last;
     NodeT* token = next_token(parser, 1);
@@ -269,15 +258,19 @@ NodeT* parser_parse_server_block(ParserT* parser) {
     last = NULL;
 
     if (!chain_take(parser, chain, &last, &token, NK_WORD, 0) || (strcmp("server", token->text) != 0)) error("%s:%d: server directive expected", parser->filename, token->line);
+    server_line = token->line;
 
     skip_tokens(parser, 0, NK_SKIP, 1);
 
+    num_domains = 0;
     while (chain_take(parser, chain, &last, &token, NK_CONTENT, 0)) {
-        if (token->kind & NK_WORD) {
+        if (token->kind & NK_CONTENT) {
             if (!valid_suffix(parser->domain, token->text)) error("%s:%d: domain not valid (%s)", parser->filename, token->line, token->text);
+            num_domains++;
         }
         skip_tokens(parser, 0, NK_SKIP, 1);
     }
+    if (num_domains == 0) error("%s:%d: domain name expected", parser->filename, server_line);
 
     if (!chain_take(parser, chain, &last, &token, NK_LB, 0)) error("%s:%d: { expected", parser->filename, token->line);
     if (!token->ends_line) chain_gobble_skip(parser, chain, &last, &token, NK_BREAK, 1, 1, 0);
@@ -423,7 +416,7 @@ TemplateT* parser_parse_template(ParserT* parser, BindingT** constraints) {
         headPattern = parser_parse_section_list(parser, 0);
 
         token = take_token(parser, 0, NK_BREAK, NK_SKIP, 1, 0);
-        if ((token) && (token->text[0] == '-')) {
+        if ((token) && (token->text[0] != '=')) {
             release_node(token);
 
             tailPattern = parser_parse_section_list(parser, 0);

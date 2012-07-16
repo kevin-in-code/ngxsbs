@@ -92,7 +92,13 @@ void test() {
 
     show_node(stdout, user_conf, 0);
     fputs("\n\n-----------------\n\n", stdout);
+    show_node(stdout, tmplt->headPattern, 0);
+    fputs("\n\n-----------------\n\n", stdout);
+    show_node(stdout, tmplt->tailPattern, 0);
+    fputs("\n\n-----------------\n\n", stdout);
     write_node(stdout, user_conf);
+    fputs("\n\n-----------------\n\n", stdout);
+    render_servers(stdout, user_conf, tmplt);
 
     release_node(user_conf);
     release_template(tmplt);
