@@ -1,5 +1,5 @@
 NAME = ngxsbs
-OBJS = error.o bindings.o scanner.o parser.o generate.o
+OBJS = error.o bindings.o scanner.o parser.o generate.o main.o
 TESTS = debug.o
 
 ifeq ($(target),candidate)
@@ -32,6 +32,9 @@ PATHTESTS = $(foreach var,$(TESTS), $(DEST)$(var))
 all: build test
 
 build: $(PATHOBJS)
+	@echo Compiled program: $(NAME)
+	@mkdir -p $(DEST)
+	@$(CC) $(LFLAGS) -o $(NAME) $^
 
 test: $(PATHOBJS) $(PATHTESTS)
 	@echo Compiled program: test-$(NAME)

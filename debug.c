@@ -105,7 +105,8 @@ void test() {
     release_binding(bindings);
 }
 
-int main() {
+int maintest() {
     test();
+    return 0;
 }
 
