@@ -4,6 +4,7 @@
 #include <memory.h>
 #include "debug.h"
 #include "error.h"
+#include "generate.h"
 
 void print_indent(FILE* out, int indent) {
     while (indent > 0) {
@@ -86,12 +87,19 @@ void test() {
     TemplateT* tmplt = NULL;
     NodeT* user_conf = NULL;
 
-    tmplt = parse_template("../../ngxsbs/test/addlogs.template", "example.com", bindings, &constraints);
-    user_conf = parse_user_conf("../../ngxsbs/test/example.com.server", "example.com", constraints);
+    tmplt = parse_template("test/addlogs.template", "example.com", bindings, &constraints);
+    user_conf = parse_user_conf("test/example.com.server", "example.com", constraints);
 
     show_node(stdout, user_conf, 0);
+    fputs("\n\n-----------------\n\n", stdout);
+    write_node(stdout, user_conf);
 
     release_node(user_conf);
     release_template(tmplt);
     release_binding(bindings);
 }
+
+int main() {
+    test();
+}
+

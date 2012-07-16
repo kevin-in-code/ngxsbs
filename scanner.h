@@ -31,6 +31,7 @@ struct NodeS {
     NodeT* children;
     NodeT* next;
     int ends_line;
+    int empty;
     int line;
 };
 

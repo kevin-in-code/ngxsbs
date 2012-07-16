@@ -48,10 +48,10 @@ Default file names:
 Given example.com.server as follows:
 
     server www.example.com {
-        access_log /home/john/logs/www.example.com.access.log AccessFormat;
+        root /home/john/www/example.com/;
         return 301 $scheme://example.com$request_uri;
     }
-
+    
     server example.com *.example.com {
         location / { }
     }
@@ -62,6 +62,7 @@ and the addlogs.template file as follows:
     === allow these directives ===
         access_log ${HOME}/
         error_log  ${HOME}/
+        root       ${HOME}/
         include    /opt/nginx/includes/
         log_format
         location
@@ -71,52 +72,67 @@ and the addlogs.template file as follows:
         if
         try_files
     === host =====================
-        access_log? ${DOMAIN}.access.log AccessFormat;
-        error_log   ${DOMAIN}.error.log  ErrorFormat;
-
+        root? ${HOME}/host/${DOMAIN}/;
+    
+        access_log ${DOMAIN}.access.log AccessFormat;
+        error_log  ${DOMAIN}.error.log  ErrorFormat;
+    
+        no_log_favicon: location = /favicon.ico {
+            access_log off;
+            log_not_found off;
+        }
+    
         # USER SECTION FOLLOWS
-
+    
     ------------------------------
-
+    
         # USER SECTION ENDS
-   
+    
     === host update.${DOMAIN} ====
         access_log? ${DOMAIN}.access.log AccessFormat;
-        error_log   ${DOMAIN}.error.log  ErrorFormat;
-
+        error_log?  ${DOMAIN}.error.log  ErrorFormat;
+    
         # USER SECTION FOLLOWS
-
+    
     ------------------------------
-
+    
         # USER SECTION ENDS
-   
+    
 
 Note the question-mark preceding the access_log entry in the template.  Such entries are optional, and are overridden by any like-named directive in the user-provided configuration.  ngxsbs will produce example.com.conf as follows:
 
     server {
         server_name www.example.com;
-        error_log  example.com.error.log  ErrorFormat;
-
-        # USER SECTION FOLLOWS
-
-        access_log example.com.access.log AccessFormat;
-        return 301 $scheme://example.com$request_uri;
-
-        # USER SECTION ENDS
     
+        access_log example.com.access.log AccessFormat;
+        error_log  example.com.error.log  ErrorFormat;
+    
+        # USER SECTION FOLLOWS
+    
+        root /home/john/www/example.com/;
+        return 301 $scheme://example.com$request_uri;
+    
+        # USER SECTION ENDS
     }
-
+    
     server {
         server_name example.com *.example.com;
+    
+        root /home/john/host/example.com/;
+    
         access_log example.com.access.log AccessFormat;
         error_log  example.com.error.log  ErrorFormat;
-
-        # USER SECTION FOLLOWS
-
-        location / { }
-
-        # USER SECTION ENDS
     
+        location = /favicon.ico {
+            access_log off;
+            log_not_found off;
+        }
+    
+        # USER SECTION FOLLOWS
+    
+        location / { }
+    
+        # USER SECTION ENDS
     }
 
 Many such configurations cannot co-exist without conflicting, as long as no two configurations use the same domain name.  In addition, most of the configuration flexibility within NginX can be made available within the ngxsbs configuration files.

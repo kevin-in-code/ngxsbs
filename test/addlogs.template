@@ -1,6 +1,7 @@
 === allow these directives ===
     access_log ${HOME}/
     error_log  ${HOME}/
+    root       ${HOME}/
     include    /opt/nginx/includes/
     log_format
     location
@@ -10,8 +11,15 @@
     if
     try_files
 === host =====================
-    access_log? ${DOMAIN}.access.log AccessFormat;
-    error_log   ${DOMAIN}.error.log  ErrorFormat;
+    root? ${HOME}/host/${DOMAIN}/;
+
+    access_log ${DOMAIN}.access.log AccessFormat;
+    error_log  ${DOMAIN}.error.log  ErrorFormat;
+
+    no_log_favicon: location = /favicon.ico {
+        access_log off;
+        log_not_found off;
+    }
 
     # USER SECTION FOLLOWS
 
@@ -21,12 +29,10 @@
 
 === host update.${DOMAIN} ====
     access_log? ${DOMAIN}.access.log AccessFormat;
-    error_log   ${DOMAIN}.error.log  ErrorFormat;
+    error_log?  ${DOMAIN}.error.log  ErrorFormat;
 
     # USER SECTION FOLLOWS
 
 ------------------------------
 
     # USER SECTION ENDS
-
-

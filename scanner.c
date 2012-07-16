@@ -99,7 +99,7 @@ int is_word_char(char c) {
         case 'Z':
         case '0': case '1': case '2': case '3': case '4':
         case '5': case '6': case '7': case '8': case '9':
-        case '_': case '.':
+        case '_': case '.': case '-':
             return 1;
         default:
             return 0;
@@ -224,6 +224,7 @@ NodeT* scanner_scan(ScannerT* scanner, int allowWord, int allowBreak) {
     token->children = NULL;
     token->next = NULL;
     token->ends_line = 0;
+    token->empty = 0;
     if (scanner->index == scanner->size) {
         /* We've run out of input. */
         token->kind = NK_EOF;
@@ -239,12 +240,14 @@ NodeT* scanner_scan(ScannerT* scanner, int allowWord, int allowBreak) {
             case ' ':
             case '\t':
                 token->kind = NK_SKIP;
+                token->empty = 1;
                 scanner->line_start = 0;
                 next = take_char(scanner, next);
                 while ((next) && ((next == ' ') || (next == '\t'))) {
                     next = take_char(scanner, next);
                 }
                 if (next == '#') {
+                    token->empty = 0;
                     while ((next) && (next != '\r') && (next != '\n')) {
                         next = take_char(scanner, next);
                     }
@@ -259,6 +262,7 @@ NodeT* scanner_scan(ScannerT* scanner, int allowWord, int allowBreak) {
                     lf = 1;
                 }
                 if (next == '\0') lf = 1;
+                if (!lf) token->empty = 0;
                 scanner->line += lf;
                 token->ends_line = lf;
                 break;
